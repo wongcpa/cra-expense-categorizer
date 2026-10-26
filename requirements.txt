@@ -1,0 +1,6 @@
+# Runtime dependencies — all tools use Python stdlib only
+# No pip install required to run the webapp (open index.html directly)
+# The Python CLI also uses stdlib only
+
+# Development / testing only
+pytest>=7.0

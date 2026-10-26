@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRA Expense Categorizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0a0c0f;
+    --surface:  #111418;
+    --surface2: #181c22;
+    --border:   #1e2530;
+    --border2:  #2a3340;
+    --teal:     #00d4aa;
+    --teal-dim: #00906e;
+    --amber:    #f5a623;
+    --red:      #e05555;
+    --green:    #3dd68c;
+    --text:     #e8edf2;
+    --muted:    #5a6a7a;
+    --mono:     'JetBrains Mono', monospace;
+    --display:  'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--teal);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--teal);
+  }
+  .logo-text {
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .logo-sub {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .header-badge {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid var(--teal-dim);
+    color: var(--teal);
+    border-radius: 2px;
+  }
+
+  /* ── LAYOUT ── */
+  main { padding: 2rem 2.5rem; max-width: 1400px; margin: 0 auto; }
+
+  /* ── DROP ZONE ── */
+  .drop-area {
+    border: 1.5px dashed var(--border2);
+    border-radius: 8px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface);
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+  .drop-area:hover, .drop-area.dragover {
+    border-color: var(--teal);
+    background: rgba(0,212,170,0.04);
+  }
+  .drop-area.dragover { transform: scale(1.005); }
+  .drop-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+  .drop-title {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .drop-sub {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .drop-sub span { color: var(--teal); }
+  #file-input { display: none; }
+
+  .file-loaded {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+  }
+  .file-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .file-name { color: var(--text); flex: 1; }
+  .file-meta { color: var(--muted); font-size: 11px; }
+  .clear-btn {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 16px; padding: 0 4px;
+    transition: color 0.15s;
+  }
+  .clear-btn:hover { color: var(--red); }
+
+  /* ── CONTROLS ── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--teal-dim); color: var(--teal); }
+  .btn-primary {
+    background: var(--teal);
+    color: #000;
+    border-color: var(--teal);
+    font-weight: 500;
+  }
+  .btn-primary:hover { background: #00efc0; border-color: #00efc0; color: #000; }
+  .btn-primary:disabled { background: var(--border); color: var(--muted); border-color: var(--border); cursor: not-allowed; }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .stat-value.green { color: var(--green); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.red   { color: var(--red); }
+  .stat-value.teal  { color: var(--teal); }
+
+  /* ── SECTION HEADERS ── */
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-head h2 {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .section-head .count {
+    font-size: 10px;
+    padding: 2px 7px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    color: var(--muted);
+  }
+
+  /* ── SUMMARY TABLE ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .summary-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.15s;
+  }
+  .summary-row:hover { border-color: var(--border2); }
+  .cat-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .cat-info { flex: 1; min-width: 0; }
+  .cat-name { color: var(--text); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cat-line { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .cat-amounts { text-align: right; flex-shrink: 0; }
+  .cat-total { color: var(--text); font-size: 12px; }
+  .cat-ded { font-size: 10px; margin-top: 2px; }
+  .cat-ded.full  { color: var(--green); }
+  .cat-ded.half  { color: var(--amber); }
+  .cat-ded.zero  { color: var(--red); }
+  .bar-wrap { width: 60px; background: var(--border); border-radius: 2px; height: 3px; flex-shrink: 0; }
+  .bar-fill { height: 3px; border-radius: 2px; background: var(--teal); }
+
+  /* ── TRANSACTION TABLE ── */
+  .txn-table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .txn-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .txn-table th {
+    background: var(--surface2);
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  .txn-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .txn-table tr:last-child td { border-bottom: none; }
+  .txn-table tr:hover td { background: rgba(255,255,255,0.015); }
+  .amount-col { text-align: right; font-variant-numeric: tabular-nums; }
+  .ded-col { text-align: right; }
+  .flag-warn { color: var(--amber); font-size: 11px; }
+  .flag-ok   { color: var(--green); font-size: 11px; }
+
+  .cat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  /* ── FLAG TABLE ── */
+  .flag-table-wrap {
+    background: var(--surface);
+    border: 1px solid rgba(240,90,90,0.3);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.12s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(0,212,170,0.06);
+  }
+  .search-input {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 5px 12px;
+    border-radius: 2px;
+    outline: none;
+    margin-left: auto;
+    width: 200px;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--teal); }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* ── EXPORT ── */
+  .export-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 1rem;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+  }
+  .empty-state .big { font-family: var(--display); font-size: 48px; font-weight: 800; color: var(--border2); margin-bottom: 1rem; }
+
+  /* ── DISCLAIMER ── */
+  .disclaimer {
+    font-size: 10px;
+    color: var(--muted);
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    main { padding: 1rem; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">CX</div>
+    <div>
+      <div class="logo-text">Expense Categorizer</div>
+      <div class="logo-sub">CRA T2125 Mapping Tool</div>
+    </div>
+  </div>
+  <div class="header-badge">100% Local · No Upload</div>
+</header>
+
+<main>
+  <!-- DROP ZONE -->
+  <div class="drop-area" id="drop-area" onclick="document.getElementById('file-input').click()">
+    <div class="drop-icon">⬇</div>
+    <div class="drop-title">Drop your bank statement CSV here</div>
+    <div class="drop-sub">or click to browse &nbsp;·&nbsp; Expected columns: <span>Date, Description, Debit, Credit, Balance</span></div>
+    <div class="drop-sub" style="margin-top:6px">Test fixture: <span>bank_statement.csv</span></div>
+  </div>
+  <input type="file" id="file-input" accept=".csv">
+
+  <div class="file-loaded" id="file-loaded" style="display:none">
+    <div class="file-dot"></div>
+    <div class="file-name" id="file-name"></div>
+    <div class="file-meta" id="file-meta"></div>
+    <button class="clear-btn" onclick="resetAll()" title="Clear">✕</button>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button class="btn btn-primary" id="run-btn" disabled onclick="runAnalysis()">Run Analysis</button>
+    <button class="btn" id="export-btn" style="display:none" onclick="exportCSV()">Export CSV</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" style="display:none">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-value teal" id="s-total">$0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Fully Deductible</div>
+        <div class="stat-value green" id="s-deductible">$0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Transactions</div>
+        <div class="stat-value" id="s-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Needs Review</div>
+        <div class="stat-value amber" id="s-review">0</div>
+      </div>
+    </div>
+
+    <!-- SUMMARY BY CATEGORY -->
+    <div class="section-head">
+      <h2>Summary by CRA Category</h2>
+      <span class="count" id="cat-count">0 categories</span>
+    </div>
+    <div class="summary-grid" id="summary-grid"></div>
+
+    <!-- FLAGS -->
+    <div id="flag-section" style="display:none">
+      <div class="section-head">
+        <h2 style="color:var(--amber)">⚠ Requires Manual Review</h2>
+        <span class="count" id="flag-count"></span>
+      </div>
+      <div class="flag-table-wrap">
+        <table class="txn-table" id="flag-table">
+          <thead>
+            <tr>
+              <th>Date</th><th>Description</th>
+              <th class="amount-col">Amount</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="flag-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TRANSACTION DETAIL -->
+    <div class="section-head">
+      <h2>Transaction Detail</h2>
+      <span class="count" id="txn-count"></span>
+    </div>
+    <div class="filter-bar" id="filter-bar">
+      <button class="filter-btn active" onclick="filterCat('ALL',this)">All</button>
+      <input class="search-input" id="search" placeholder="Search description..." oninput="applyFilter()">
+    </div>
+    <div class="txn-table-wrap">
+      <table class="txn-table">
+        <thead>
+          <tr>
+            <th>Date</th><th>Description</th><th>Category</th>
+            <th class="amount-col">Amount</th>
+            <th class="ded-col">Deductible</th>
+            <th class="ded-col">Ded %</th>
+          </tr>
+        </thead>
+        <tbody id="txn-body"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /results -->
+
+  <div class="empty-state" id="empty-state">
+    <div class="big">T2125</div>
+    <div>Drop a bank statement CSV to begin categorization</div>
+  </div>
+
+  <div class="disclaimer">
+    All processing runs in your browser. No data is uploaded to any server. &nbsp;|&nbsp;
+    CRA T2125 categorization tool — consult a CPA for final filing.
+  </div>
+</main>
+
+<script>
+// ── CRA CATEGORIES ────────────────────────────────────────────────────────────
+const CRA = {
+  ADVERTISING:           { line:"8520 — Advertising",                ded:1.0,  color:"#4a9eff" },
+  MEALS_ENTERTAINMENT:   { line:"8523 — Meals & entertainment",      ded:0.5,  color:"#f5a623" },
+  MOTOR_VEHICLE:         { line:"9281 — Motor vehicle expenses",     ded:1.0,  color:"#a78bfa" },
+  OFFICE_SUPPLIES:       { line:"8810 — Office expenses",            ded:1.0,  color:"#34d399" },
+  RENT:                  { line:"8910 — Rent",                       ded:1.0,  color:"#00d4aa" },
+  TELEPHONE_INTERNET:    { line:"9270 — Telephone & utilities",      ded:1.0,  color:"#60a5fa" },
+  INSURANCE:             { line:"8690 — Insurance",                  ded:1.0,  color:"#818cf8" },
+  PROFESSIONAL_FEES:     { line:"8860 — Professional fees",          ded:1.0,  color:"#c084fc" },
+  BANK_CHARGES:          { line:"8710 — Bank charges",               ded:1.0,  color:"#6b7280" },
+  SOFTWARE_SUBSCRIPTIONS:{ line:"8810 — Computer / SaaS",            ded:1.0,  color:"#38bdf8" },
+  MEDICAL_SUPPLIES:      { line:"8811 — Profession-specific supplies",ded:1.0,  color:"#f472b6" },
+  CONTINUING_EDUCATION:  { line:"8560 — Training",                   ded:1.0,  color:"#fb923c" },
+  PAYROLL:               { line:"9060 — Salaries & wages",           ded:1.0,  color:"#a3e635" },
+  UTILITIES:             { line:"9270 — Utilities",                  ded:1.0,  color:"#2dd4bf" },
+  UNCATEGORIZED:         { line:"— REVIEW REQUIRED —",               ded:0.0,  color:"#e05555" },
+};
+
+const RULES = [
+  [/\b(payroll|adp|ceridian|humi|direct\s*deposit|wage|salary)\b/i,                            "PAYROLL"],
+  [/\b(rent|lease|landlord|property\s*mgmt)\b/i,                                               "RENT"],
+  [/\b(intact|aviva|manulife|sunlife|desjardins|insurance|insur|premium)\b/i,                  "INSURANCE"],
+  [/\b(cpa|accountant|lawyer|legal|notary|bookkeep|consultant|advisory)\b/i,                   "PROFESSIONAL_FEES"],
+  [/\b(microsoft|google\s*workspace|adobe|intuit|quickbooks|xero|freshbooks|dropbox|slack|zoom|aws|azure|shopify|jane\s*app|janeapp|saas|subscription)\b/i, "SOFTWARE_SUBSCRIPTIONS"],
+  [/\b(rogers|bell|telus|shaw|videotron|koodo|fido|virgin\s*mobile|internet|wireless|cell\s*phone|telecom)\b/i, "TELEPHONE_INTERNET"],
+  [/\b(hydro|enbridge|atco|fortis|bc\s*hydro|ontario\s*hydro|electricity|natural\s*gas|water\s*bill|utility|utilities)\b/i, "UTILITIES"],
+  [/\b(medichair|chiro\s*supply|linens|treatment\s*table|medical\s*supply|clinic\s*supply|rehab\s*supply|acupuncture)\b/i, "MEDICAL_SUPPLIES"],
+  [/\b(seminar|conference|course|cce|webinar|continuing\s*ed|cmcc|chiropractic\s*assoc|udemy|coursera|linkedin\s*learning)\b/i, "CONTINUING_EDUCATION"],
+  [/\b(facebook\s*ads|google\s*ads|meta\s*ads|marketing|advertis|flyer|signage|seo|mailchimp|yelp)\b/i, "ADVERTISING"],
+  [/\b(restaurant|cafe|coffee|starbucks|tim\s*hortons|doordash|uber\s*eats|skip|dining|lunch|dinner|breakfast|catering|bar|pub)\b/i, "MEALS_ENTERTAINMENT"],
+  [/\b(petro\s*canada|shell|esso|husky|gas\s*station|fuel|parking|autopark|impark|green\s*p|car\s*wash|jiffy\s*lube|midas|canadian\s*tire|vehicle|auto)\b/i, "MOTOR_VEHICLE"],
+  [/\b(staples|bureau\s*en\s*gros|office\s*depot|paper|toner|ink|printer|binder|stationery)\b/i, "OFFICE_SUPPLIES"],
+  [/\b(service\s*charge|bank\s*fee|nsf|wire\s*fee|monthly\s*fee|account\s*fee|transaction\s*fee|interest\s*charged|overdraft)\b/i, "BANK_CHARGES"],
+];
+
+function categorize(desc) {
+  for (const [re, cat] of RULES) {
+    if (re.test(desc)) return cat;
+  }
+  return "UNCATEGORIZED";
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let allTxns = [];
+let activeFilter = "ALL";
+
+// ── FILE HANDLING ─────────────────────────────────────────────────────────────
+const dropArea  = document.getElementById("drop-area");
+const fileInput = document.getElementById("file-input");
+let loadedFile  = null;
+
+dropArea.addEventListener("dragover", e => { e.preventDefault(); dropArea.classList.add("dragover"); });
+dropArea.addEventListener("dragleave", () => dropArea.classList.remove("dragover"));
+dropArea.addEventListener("drop", e => {
+  e.preventDefault(); dropArea.classList.remove("dragover");
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+fileInput.addEventListener("change", e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+  if (!file.name.endsWith(".csv")) {
+    alert("Please upload a .csv file.");
+    return;
+  }
+  loadedFile = file;
+  document.getElementById("drop-area").style.display = "none";
+  document.getElementById("file-loaded").style.display = "flex";
+  document.getElementById("file-name").textContent = file.name;
+  document.getElementById("file-meta").textContent =
+    (file.size / 1024).toFixed(1) + " KB";
+  document.getElementById("run-btn").disabled = false;
+}
+
+function resetAll() {
+  loadedFile = null; allTxns = []; activeFilter = "ALL";
+  document.getElementById("drop-area").style.display = "block";
+  document.getElementById("file-loaded").style.display = "none";
+  document.getElementById("results").style.display = "none";
+  document.getElementById("empty-state").style.display = "block";
+  document.getElementById("run-btn").disabled = true;
+  document.getElementById("export-btn").style.display = "none";
+  fileInput.value = "";
+}
+
+// ── CSV PARSER ────────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
+  return lines.slice(1).map(line => {
+    const vals = line.split(",");
+    const obj = {};
+    headers.forEach((h, i) => {
+      obj[h] = (vals[i] || "").trim().replace(/^"|"$/g, "");
+    });
+    return obj;
+  });
+}
+
+// ── ANALYSIS ──────────────────────────────────────────────────────────────────
+function runAnalysis() {
+  if (!loadedFile) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const rows = parseCSV(e.target.result);
+
+    // Validate columns
+    const first = rows[0] || {};
+    const required = ["Date","Description","Debit"];
+    const missing = required.filter(c => !(c in first));
+    if (missing.length) {
+      alert("Missing columns: " + missing.join(", ") +
+            "\nExpected: Date, Description, Debit, Credit, Balance");
+      return;
+    }
+
+    // Build transactions
+    allTxns = [];
+    rows.forEach(row => {
+      const debit  = parseFloat(row.Debit  || 0);
+      const credit = parseFloat(row.Credit || 0);
+      const amount = debit + credit;
+      if (amount >= 0) return; // skip income
+      const desc = row.Description || "";
+      const cat  = categorize(desc);
+      const info = CRA[cat];
+      allTxns.push({
+        date:      row.Date,
+        desc,
+        amount:    Math.abs(amount),
+        cat,
+        line:      info.line,
+        ded_pct:   info.ded * 100,
+        ded_amt:   Math.abs(amount) * info.ded,
+        color:     info.color,
+      });
+    });
+
+    renderResults();
+  };
+  reader.readAsText(loadedFile);
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function fmt(n) { return "$" + n.toLocaleString("en-CA", {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+function renderResults() {
+  document.getElementById("empty-state").style.display = "none";
+  document.getElementById("results").style.display = "block";
+  document.getElementById("export-btn").style.display = "inline-flex";
+
+  const total    = allTxns.reduce((s, t) => s + t.amount, 0);
+  const totalDed = allTxns.reduce((s, t) => s + t.ded_amt, 0);
+  const uncats   = allTxns.filter(t => t.cat === "UNCATEGORIZED");
+
+  document.getElementById("s-total").textContent      = fmt(total);
+  document.getElementById("s-deductible").textContent = fmt(totalDed);
+  document.getElementById("s-count").textContent      = allTxns.length;
+  document.getElementById("s-review").textContent     = uncats.length;
+  document.getElementById("txn-count").textContent    = allTxns.length + " transactions";
+
+  // Summary by category
+  const summary = {};
+  allTxns.forEach(t => {
+    if (!summary[t.cat]) summary[t.cat] = { total:0, ded:0, count:0, color:t.color, line:t.line, ded_pct:t.ded_pct };
+    summary[t.cat].total += t.amount;
+    summary[t.cat].ded   += t.ded_amt;
+    summary[t.cat].count++;
+  });
+  const sortedCats = Object.entries(summary).sort((a,b) => b[1].total - a[1].total);
+
+  document.getElementById("cat-count").textContent = sortedCats.length + " categories";
+
+  const sumGrid = document.getElementById("summary-grid");
+  sumGrid.innerHTML = "";
+  const maxTotal = sortedCats[0]?.[1].total || 1;
+  sortedCats.forEach(([cat, data]) => {
+    const barPct = Math.round((data.total / maxTotal) * 100);
+    const dedClass = data.ded_pct === 100 ? "full" : data.ded_pct === 50 ? "half" : "zero";
+    const dedLabel = data.ded_pct === 100 ? "100% deductible" : data.ded_pct === 50 ? "50% deductible (ITA s.67.1)" : "⚠ Review required";
+    sumGrid.innerHTML += `
+      <div class="summary-row">
+        <div class="cat-dot" style="background:${data.color}"></div>
+        <div class="cat-info">
+          <div class="cat-name">${cat.replace(/_/g," ")}</div>
+          <div class="cat-line">${data.line}</div>
+        </div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${barPct}%;background:${data.color}"></div></div>
+        <div class="cat-amounts">
+          <div class="cat-total">${fmt(data.total)}</div>
+          <div class="cat-ded ${dedClass}">${fmt(data.ded)} · ${dedLabel}</div>
+        </div>
+      </div>`;
+  });
+
+  // Filter buttons
+  const filterBar = document.getElementById("filter-bar");
+  filterBar.innerHTML = `<button class="filter-btn active" onclick="filterCat('ALL',this)">All</button>`;
+  sortedCats.forEach(([cat]) => {
+    filterBar.innerHTML += `<button class="filter-btn" onclick="filterCat('${cat}',this)">${cat.replace(/_/g," ")}</button>`;
+  });
+  filterBar.innerHTML += `<input class="search-input" id="search" placeholder="Search description..." oninput="applyFilter()">`;
+
+  // Flag section
+  if (uncats.length > 0) {
+    document.getElementById("flag-section").style.display = "block";
+    document.getElementById("flag-count").textContent = uncats.length + " items";
+    const flagBody = document.getElementById("flag-body");
+    flagBody.innerHTML = "";
+    uncats.forEach(t => {
+      flagBody.innerHTML += `
+        <tr>
+          <td>${t.date}</td>
+          <td>${t.desc}</td>
+          <td class="amount-col">${fmt(t.amount)}</td>
+          <td><span class="flag-warn">⚠ Assign T2125 line manually</span></td>
+        </tr>`;
+    });
+  } else {
+    document.getElementById("flag-section").style.display = "none";
+  }
+
+  renderTxnTable(allTxns);
+}
+
+function renderTxnTable(txns) {
+  const body = document.getElementById("txn-body");
+  body.innerHTML = "";
+  txns.forEach(t => {
+    const dedClass = t.ded_pct === 100 ? "flag-ok" : t.ded_pct === 50 ? "flag-warn" : "";
+    body.innerHTML += `
+      <tr>
+        <td style="color:var(--muted)">${t.date}</td>
+        <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.desc}</td>
+        <td>
+          <span class="cat-pill" style="background:${t.color}18;color:${t.color};border:1px solid ${t.color}40">
+            <span style="width:5px;height:5px;border-radius:50%;background:${t.color};display:inline-block"></span>
+            ${t.cat.replace(/_/g," ")}
+          </span>
+        </td>
+        <td class="amount-col">${fmt(t.amount)}</td>
+        <td class="ded-col ${dedClass}">${fmt(t.ded_amt)}</td>
+        <td class="ded-col" style="color:var(--muted)">${t.ded_pct}%</td>
+      </tr>`;
+  });
+}
+
+function filterCat(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  applyFilter();
+}
+
+function applyFilter() {
+  const search = (document.getElementById("search")?.value || "").toLowerCase();
+  let filtered = allTxns;
+  if (activeFilter !== "ALL") filtered = filtered.filter(t => t.cat === activeFilter);
+  if (search) filtered = filtered.filter(t => t.desc.toLowerCase().includes(search));
+  renderTxnTable(filtered);
+  document.getElementById("txn-count").textContent = filtered.length + " transactions";
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const header = "Date,Description,Category,T2125 Line,Amount,Deductible Amount,Deductibility %\n";
+  const rows = allTxns.map(t =>
+    `"${t.date}","${t.desc.replace(/"/g,'""')}","${t.cat}","${t.line}",${t.amount.toFixed(2)},${t.ded_amt.toFixed(2)},${t.ded_pct}`
+  ).join("\n");
+  const blob = new Blob([header + rows], {type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "cra_categorized_expenses.csv";
+  a.click();
+}
+</script>
+</body>
+</html>
