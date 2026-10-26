@@ -79,6 +79,22 @@ class TestGenerateReport:
         assert all(t['deductible_amount'] == 0.0 for t in uncats)
     def test_has_t2125_line(self, report):
         assert all('t2125_line' in t for t in report)
+    def test_default_assumes_full_business_use(self, report):
+        vehicle = [t for t in report if t['category'] == 'MOTOR_VEHICLE']
+        assert vehicle and all(t['deductible_amount'] == t['amount'] for t in vehicle)
+
+class TestBusinessUse:
+    def test_business_use_applied_to_vehicle_and_phone(self):
+        txns = [{'date':'2025-01-01','description':'PETRO CANADA FUEL','amount':100.0},
+                {'date':'2025-01-02','description':'ROGERS COMMUNICATIONS','amount':80.0},
+                {'date':'2025-01-03','description':'STAPLES BUSINESS DEPOT','amount':50.0}]
+        r = generate_report(txns, {'MOTOR_VEHICLE':0.6, 'TELEPHONE_INTERNET':0.5})
+        assert [t['deductible_amount'] for t in r] == [60.0, 40.0, 50.0]
+        assert [t['deductibility_pct'] for t in r] == [60.0, 50.0, 100.0]
+    def test_business_use_does_not_affect_meals(self):
+        r = generate_report([{'date':'2025-01-01','description':'TIM HORTONS','amount':20.0}],
+                            {'MOTOR_VEHICLE':0.5})
+        assert r[0]['deductible_amount'] == 10.0
 
 class TestIntegration:
     def test_full_pipeline(self, tmp_path):
@@ -88,7 +104,8 @@ class TestIntegration:
         out = str(tmp_path / 'categorized.csv')
         export_csv(report, out)
         assert os.path.exists(out)
-        rows = list(csv.DictReader(open(out)))
+        with open(out, newline='', encoding='utf-8-sig') as f:
+            rows = list(csv.DictReader(f))
         assert len(rows) > 0
         assert 'category' in rows[0]
         assert 'deductible_amount' in rows[0]

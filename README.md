@@ -19,6 +19,7 @@ Built to reflect bookkeeping automation work for a Canadian sole proprietor heal
 |---|---|
 | 14 CRA categories | Mapped to T2125 line numbers |
 | ITA s.67.1 | 50% meals & entertainment cap applied automatically |
+| Business-use % | Motor vehicle and phone deductions prorated for business use (default 100%, adjustable) |
 | Canadian vendors | Rogers, Bell, Telus, Petro-Canada, Hydro One, JaneApp, Medichair, and more |
 | Uncategorized flagging | Items requiring manual CPA review clearly separated |
 | Filter + search | Web app allows filtering by category and keyword search |

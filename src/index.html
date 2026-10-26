@@ -297,6 +297,8 @@
   .txn-table tr:hover td { background: rgba(15,42,61,0.03); }
   .amount-col { text-align: right; font-variant-numeric: tabular-nums; }
   .ded-col { text-align: right; }
+  .bu-input { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .bu-input input { width: 56px; font-family: var(--mono); font-size: 11px; padding: 6px 8px; border: 1px solid var(--border2); border-radius: 2px; background: var(--surface); color: var(--text); }
   .flag-warn { color: var(--amber); font-size: 11px; }
   .flag-ok   { color: var(--green); font-size: 11px; }
 
@@ -464,6 +466,8 @@ header{background:#ffffff !important;border-bottom:1px solid #d1cdc4 !important}
   <div class="controls">
     <button class="btn btn-primary" id="run-btn" disabled onclick="runAnalysis()">Run Analysis</button>
     <button class="btn" id="export-btn" style="display:none" onclick="exportCSV()">Export CSV</button>
+    <label class="bu-input">Vehicle business use <input type="number" id="bu-vehicle" min="0" max="100" value="100" onchange="loadedFile && runAnalysis()">%</label>
+    <label class="bu-input">Phone business use <input type="number" id="bu-phone" min="0" max="100" value="100" onchange="loadedFile && runAnalysis()">%</label>
   </div>
 
   <!-- RESULTS -->
@@ -476,7 +480,7 @@ header{background:#ffffff !important;border-bottom:1px solid #d1cdc4 !important}
         <div class="stat-value teal" id="s-total">$0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Fully Deductible</div>
+        <div class="stat-label">Total Deductible</div>
         <div class="stat-value green" id="s-deductible">$0</div>
       </div>
       <div class="stat-card">
@@ -653,6 +657,13 @@ function parseCSV(text) {
 }
 
 // ── ANALYSIS ──────────────────────────────────────────────────────────────────
+// Vehicle and phone costs are deductible only for the business-use portion.
+const BUSINESS_USE = new Set(["MOTOR_VEHICLE", "TELEPHONE_INTERNET"]);
+function buPct(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? 1 : Math.min(Math.max(v, 0), 100) / 100;
+}
+
 function runAnalysis() {
   if (!loadedFile) return;
   const reader = new FileReader();
@@ -670,6 +681,7 @@ function runAnalysis() {
     }
 
     // Build transactions
+    const bu = { MOTOR_VEHICLE: buPct("bu-vehicle"), TELEPHONE_INTERNET: buPct("bu-phone") };
     allTxns = [];
     rows.forEach(row => {
       const debit  = parseFloat(row.Debit  || 0);
@@ -679,14 +691,15 @@ function runAnalysis() {
       const desc = row.Description || "";
       const cat  = categorize(desc);
       const info = CRA[cat];
+      const rate = info.ded * (bu[cat] ?? 1);
       allTxns.push({
         date:      row.Date,
         desc,
         amount:    Math.abs(amount),
         cat,
         line:      info.line,
-        ded_pct:   info.ded * 100,
-        ded_amt:   Math.abs(amount) * info.ded,
+        ded_pct:   Math.round(rate * 100),
+        ded_amt:   Math.round(Math.abs(amount) * rate * 100) / 100,
         color:     info.color,
       });
     });
@@ -731,8 +744,11 @@ function renderResults() {
   const maxTotal = sortedCats[0]?.[1].total || 1;
   sortedCats.forEach(([cat, data]) => {
     const barPct = Math.round((data.total / maxTotal) * 100);
-    const dedClass = data.ded_pct === 100 ? "full" : data.ded_pct === 50 ? "half" : "zero";
-    const dedLabel = data.ded_pct === 100 ? "100% deductible" : data.ded_pct === 50 ? "50% deductible (ITA s.67.1)" : "⚠ Review required";
+    const dedClass = cat === "UNCATEGORIZED" ? "zero" : data.ded_pct === 100 ? "full" : "half";
+    const dedLabel = cat === "UNCATEGORIZED" ? "⚠ Review required"
+                   : cat === "MEALS_ENTERTAINMENT" ? "50% deductible (ITA s.67.1)"
+                   : BUSINESS_USE.has(cat) ? `${data.ded_pct}% deductible (business use)`
+                   : `${data.ded_pct}% deductible`;
     sumGrid.innerHTML += `
       <div class="summary-row">
         <div class="cat-dot" style="background:${data.color}"></div>

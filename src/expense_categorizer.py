@@ -25,6 +25,7 @@ import re
 import sys
 from collections import defaultdict
 from datetime import datetime
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -133,6 +134,23 @@ def prompt_for_file(max_attempts: int = 3) -> str:
     sys.exit(1)
 
 
+def prompt_for_business_use(label: str, max_attempts: int = 3) -> float:
+    """Prompt for a business-use percentage (0–100); blank means 100%."""
+    for attempt in range(1, max_attempts + 1):
+        raw = input(f"\n{label} business-use % [100]: ").strip()
+        if not raw:
+            return 1.0
+        try:
+            pct = float(raw.rstrip("%"))
+            if 0 <= pct <= 100:
+                return pct / 100
+        except ValueError:
+            pass
+        print("  ERROR: Enter a number from 0 to 100.")
+    print("  Using 100%.")
+    return 1.0
+
+
 def prompt_for_output(default: str = "categorized_expenses_cra.csv") -> str:
     raw = input(f"\nOutput CSV filename [{default}]: ").strip()
     return raw if raw else default
@@ -160,18 +178,35 @@ def load_transactions(filepath: str) -> List[Dict]:
     return transactions
 
 
-def generate_report(transactions: List[Dict]) -> List[Dict]:
-    """Categorize transactions and return enriched list."""
+# Vehicle and phone costs are deductible only for the business-use portion.
+BUSINESS_USE_CATEGORIES = ("MOTOR_VEHICLE", "TELEPHONE_INTERNET")
+
+
+def round_half_up(amount: float) -> float:
+    """Round to cents with halves going up (5.625 -> 5.63), as in accounting."""
+    return float(Decimal(repr(amount)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
+def generate_report(transactions: List[Dict],
+                    business_use: Dict[str, float] = None) -> List[Dict]:
+    """
+    Categorize transactions and return enriched list.
+
+    business_use maps MOTOR_VEHICLE / TELEPHONE_INTERNET to a business-use
+    fraction (0.0–1.0); unspecified categories assume 100% business use.
+    """
+    business_use = business_use or {}
     categorized = []
     for txn in transactions:
         cat      = categorize(txn["description"])
         cat_info = CRA_CATEGORIES[cat]
+        rate     = cat_info["deductibility"] * business_use.get(cat, 1.0)
         categorized.append({
             **txn,
             "category":          cat,
             "t2125_line":        cat_info["t2125_line"],
-            "deductibility_pct": cat_info["deductibility"] * 100,
-            "deductible_amount": round(txn["amount"] * cat_info["deductibility"], 2),
+            "deductibility_pct": round(rate * 100, 2),
+            "deductible_amount": round_half_up(txn["amount"] * rate),
         })
     return categorized
 
@@ -210,7 +245,7 @@ def print_report(categorized: List[Dict]) -> None:
     grand_total = grand_ded = 0.0
     for cat, data in sorted(summary.items(), key=lambda x: -x[1]["deductible"]):
         line  = CRA_CATEGORIES[cat]["t2125_line"][:32]
-        ded   = CRA_CATEGORIES[cat]["deductibility"] * 100
+        ded   = data["deductible"] / data["total"] * 100 if data["total"] else 0.0
         print(f"  {cat[:23]:<24} {line:<33} "
               f"${data['total']:>9,.2f} ${data['deductible']:>9,.2f} "
               f"{ded:>5.0f}%")
@@ -236,7 +271,7 @@ def export_csv(categorized: List[Dict], filepath: str) -> None:
     """Export categorized transactions to CSV."""
     if not categorized:
         return
-    with open(filepath, "w", newline="") as f:
+    with open(filepath, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=categorized[0].keys())
         writer.writeheader()
         writer.writerows(categorized)
@@ -249,16 +284,24 @@ def export_csv(categorized: List[Dict], filepath: str) -> None:
 
 def main():
     input_path  = prompt_for_file()
+    business_use = {
+        "MOTOR_VEHICLE":      prompt_for_business_use("Motor vehicle"),
+        "TELEPHONE_INTERNET": prompt_for_business_use("Telephone & internet"),
+    }
     output_path = prompt_for_output()
 
     print(f"\nLoading transactions from: {input_path}")
     transactions = load_transactions(input_path)
     print(f"Processing {len(transactions)} expense transactions...")
+    print(f"Business use: motor vehicle {business_use['MOTOR_VEHICLE']:.0%}, "
+          f"telephone & internet {business_use['TELEPHONE_INTERNET']:.0%}")
 
-    categorized = generate_report(transactions)
+    categorized = generate_report(transactions, business_use)
     print_report(categorized)
     export_csv(categorized, output_path)
 
 
 if __name__ == "__main__":
+    # Report symbols (✔, →) must print even when output is redirected on Windows.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     main()
