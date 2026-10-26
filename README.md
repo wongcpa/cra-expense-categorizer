@@ -9,7 +9,7 @@ Built to reflect bookkeeping automation work for a Canadian sole proprietor heal
 ---
 
 ## Live Demo
-Open `src/index.html` — drop `fixtures/bank_statement.csv` to see categorization with deductibility breakdown.
+**[Try it live →](https://www.wong.cpa/cra-expense-categorizer/src/)**. Or open `src/index.html` locally — drop `tests/fixtures/bank_statement.csv` to see categorization with deductibility breakdown.
 
 ---
 
@@ -34,9 +34,9 @@ cra-expense-categorizer/
 │   ├── index.html              # Browser web app (drag & drop)
 │   └── expense_categorizer.py  # Python CLI with file prompts
 ├── tests/
-│   └── test_expense_categorizer.py  # pytest suite — categories, deductibility, CSV
-├── fixtures/
-│   └── bank_statement.csv      # 50 realistic Canadian transactions (Jan–Feb 2025)
+│   ├── test_expense_categorizer.py  # pytest suite — categories, deductibility, CSV
+│   └── fixtures/
+│       └── bank_statement.csv      # 45 realistic Canadian transactions (Jan–Feb 2025)
 ├── requirements.txt
 ├── .gitignore
 └── LICENSE
@@ -46,14 +46,14 @@ cra-expense-categorizer/
 
 ## Quick Start
 
-**Web app:** `open src/index.html` → drop `fixtures/bank_statement.csv`.
+**Web app:** `open src/index.html` → drop `tests/fixtures/bank_statement.csv`.
 
 **CLI:**
 ```bash
 git clone https://github.com/wongcpa/cra-expense-categorizer.git
 cd cra-expense-categorizer
 python src/expense_categorizer.py
-# Enter: fixtures/bank_statement.csv
+# Enter: tests/fixtures/bank_statement.csv
 ```
 
 **Tests:** `pip install pytest && pytest tests/ -v`
