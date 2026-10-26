@@ -4,23 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRA Expense Categorizer</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='18' fill='%230F2A3D'/%3E%3Cpolyline points='44,100 74,146 112,60' fill='none' stroke='%23fff' stroke-width='18' stroke-linecap='square'/%3E%3Cpolyline points='90,100 120,146 158,60' fill='none' stroke='%23C9A45C' stroke-width='18' stroke-linecap='square'/%3E%3C/svg%3E">
 <style>
   :root {
-    --bg:       #0a0c0f;
-    --surface:  #111418;
-    --surface2: #181c22;
-    --border:   #1e2530;
-    --border2:  #2a3340;
-    --teal:     #00d4aa;
-    --teal-dim: #00906e;
-    --amber:    #f5a623;
-    --red:      #e05555;
-    --green:    #3dd68c;
-    --text:     #e8edf2;
-    --muted:    #5a6a7a;
-    --mono:     'JetBrains Mono', monospace;
-    --display:  'Syne', sans-serif;
+    --bg:       #F6F6F4;
+    --surface:  #ffffff;
+    --surface2: #f5f0e8;
+    --border:   #d1cdc4;
+    --border2:  #bfb9ad;
+    --teal:     #7A5F2C;
+    --teal-dim: #9A7A3E;
+    --amber:    #b45309;
+    --red:      #b91c1c;
+    --green:    #15803d;
+    --text:     #0d0d0d;
+    --muted:    #6b7280;
+    --mono:     'IBM Plex Mono',ui-monospace,monospace;
+    --display:  'Sora',system-ui,sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -97,7 +99,7 @@
   }
   .drop-area:hover, .drop-area.dragover {
     border-color: var(--teal);
-    background: rgba(0,212,170,0.04);
+    background: rgba(122,95,44,0.04);
   }
   .drop-area.dragover { transform: scale(1.005); }
   .drop-icon {
@@ -292,7 +294,7 @@
     vertical-align: middle;
   }
   .txn-table tr:last-child td { border-bottom: none; }
-  .txn-table tr:hover td { background: rgba(255,255,255,0.015); }
+  .txn-table tr:hover td { background: rgba(15,42,61,0.03); }
   .amount-col { text-align: right; font-variant-numeric: tabular-nums; }
   .ded-col { text-align: right; }
   .flag-warn { color: var(--amber); font-size: 11px; }
@@ -312,7 +314,7 @@
   /* ── FLAG TABLE ── */
   .flag-table-wrap {
     background: var(--surface);
-    border: 1px solid rgba(240,90,90,0.3);
+    border: 1px solid rgba(185,28,28,0.3);
     border-radius: 6px;
     overflow: hidden;
     margin-bottom: 2rem;
@@ -342,7 +344,7 @@
   .filter-btn:hover, .filter-btn.active {
     border-color: var(--teal);
     color: var(--teal);
-    background: rgba(0,212,170,0.06);
+    background: rgba(122,95,44,0.06);
   }
   .search-input {
     font-family: var(--mono);
@@ -392,9 +394,38 @@
     .stats-row { grid-template-columns: 1fr 1fr; }
     .summary-grid { grid-template-columns: 1fr; }
   }
+
+/* ── WONG.CPA BRAND LAYER ── */
+body{font-family:'IBM Plex Sans',system-ui,sans-serif}
+.wb-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.7rem 2.5rem;background:#0F2A3D}
+.wb-brand{display:inline-flex;align-items:center;gap:0.6rem;font-family:'Sora',system-ui,sans-serif;font-weight:600;font-size:0.95rem;color:#fff;text-decoration:none;letter-spacing:-0.01em}
+.wb-brand svg{border-radius:4px;flex:none}
+.wb-back{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;color:#C9A45C;text-decoration:none;transition:color 0.15s}
+.wb-back:hover{color:#fff}
+header{background:#ffffff !important;border-bottom:1px solid #d1cdc4 !important}
+.logo-text{font-family:'Sora',system-ui,sans-serif !important;color:#0F2A3D !important;font-style:normal !important;font-weight:700 !important;letter-spacing:-0.01em}
+.logo em{color:#7A5F2C}
+.logo-sub{color:#7A5F2C !important;font-family:'IBM Plex Mono',monospace}
+.logo-icon{border-color:#0F2A3D !important;color:#0F2A3D !important;background:#f5f0e8}
+.header-badge,.fx-badge,.std-badge,header .tag{border-color:#9A7A3E !important;color:#7A5F2C !important;opacity:1 !important}
+.wb-samples{display:flex;flex-wrap:wrap;align-items:baseline;gap:0.35rem 1rem;padding:0.65rem 2.5rem;background:#f5f0e8;border-bottom:1px solid #d1cdc4;font-family:'IBM Plex Mono',monospace;font-size:11px}
+.wb-samples-label{letter-spacing:0.08em;text-transform:uppercase;color:#6b7280}
+.wb-samples a{color:#7A5F2C;text-decoration:none;border-bottom:1px dotted #9A7A3E}
+.wb-samples a:hover{border-bottom-style:solid}
+.wb-samples a.wb-gh{color:#6b7280;border-bottom-color:#d1cdc4}
+.btn-primary,.toggle-btn.active{background:#0F2A3D;border-color:#0F2A3D;color:#fff}
+.btn-primary:hover{background:#1B3D55;border-color:#1B3D55;color:#fff}
+.btn-primary:disabled{background:#d1cdc4;border-color:#d1cdc4;color:#6b7280}
+.results-title,.section-head h2,.empty-big,.rb-title,.pdf-icon,.dc-title{font-style:normal !important}
+.acct-code,.stmt-code,.code-cell,.fr-amt,.stmt-amount,.amount-col,.mc-l,.stat-label,.metric-label,th{font-family:'IBM Plex Mono',monospace}
+@media(max-width:900px){.wb-bar,.wb-samples{padding-left:1rem;padding-right:1rem}}
 </style>
 </head>
 <body>
+<div class="wb-bar">
+  <a class="wb-brand" href="https://www.wong.cpa/"><svg viewBox="0 0 200 200" width="26" height="26" aria-hidden="true"><rect width="200" height="200" rx="14" fill="#0F2A3D"/><polyline points="45,96 75,140 111,60" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="square"/><polyline points="89,96 119,140 155,60" fill="none" stroke="#C9A45C" stroke-width="12" stroke-linecap="square"/></svg><span>Jimmy Wong, CPA</span></a>
+  <a class="wb-back" href="https://www.wong.cpa/#projects">← All tools</a>
+</div>
 
 <header>
   <div class="logo">
@@ -406,6 +437,11 @@
   </div>
   <div class="header-badge">100% Local · No Upload</div>
 </header>
+<div class="wb-samples">
+  <span class="wb-samples-label">Sample data ↓</span>
+  <a href="../tests/fixtures/bank_statement.csv" download>bank_statement.csv</a>
+  <a class="wb-gh" href="https://github.com/wongcpa/cra-expense-categorizer/tree/main/tests/fixtures" target="_blank" rel="noopener">View on GitHub ↗</a>
+</div>
 
 <main>
   <!-- DROP ZONE -->
@@ -518,21 +554,21 @@
 <script>
 // ── CRA CATEGORIES ────────────────────────────────────────────────────────────
 const CRA = {
-  ADVERTISING:           { line:"8520 — Advertising",                ded:1.0,  color:"#4a9eff" },
-  MEALS_ENTERTAINMENT:   { line:"8523 — Meals & entertainment",      ded:0.5,  color:"#f5a623" },
-  MOTOR_VEHICLE:         { line:"9281 — Motor vehicle expenses",     ded:1.0,  color:"#a78bfa" },
-  OFFICE_SUPPLIES:       { line:"8810 — Office expenses",            ded:1.0,  color:"#34d399" },
-  RENT:                  { line:"8910 — Rent",                       ded:1.0,  color:"#00d4aa" },
-  TELEPHONE_INTERNET:    { line:"9270 — Telephone & utilities",      ded:1.0,  color:"#60a5fa" },
-  INSURANCE:             { line:"8690 — Insurance",                  ded:1.0,  color:"#818cf8" },
-  PROFESSIONAL_FEES:     { line:"8860 — Professional fees",          ded:1.0,  color:"#c084fc" },
-  BANK_CHARGES:          { line:"8710 — Bank charges",               ded:1.0,  color:"#6b7280" },
-  SOFTWARE_SUBSCRIPTIONS:{ line:"8810 — Computer / SaaS",            ded:1.0,  color:"#38bdf8" },
-  MEDICAL_SUPPLIES:      { line:"8811 — Profession-specific supplies",ded:1.0,  color:"#f472b6" },
-  CONTINUING_EDUCATION:  { line:"8560 — Training",                   ded:1.0,  color:"#fb923c" },
-  PAYROLL:               { line:"9060 — Salaries & wages",           ded:1.0,  color:"#a3e635" },
-  UTILITIES:             { line:"9270 — Utilities",                  ded:1.0,  color:"#2dd4bf" },
-  UNCATEGORIZED:         { line:"— REVIEW REQUIRED —",               ded:0.0,  color:"#e05555" },
+  ADVERTISING:           { line:"8520 — Advertising",                ded:1.0,  color:"#1d4ed8" },
+  MEALS_ENTERTAINMENT:   { line:"8523 — Meals & entertainment",      ded:0.5,  color:"#b45309" },
+  MOTOR_VEHICLE:         { line:"9281 — Motor vehicle expenses",     ded:1.0,  color:"#6d28d9" },
+  OFFICE_SUPPLIES:       { line:"8810 — Office expenses",            ded:1.0,  color:"#047857" },
+  RENT:                  { line:"8910 — Rent",                       ded:1.0,  color:"#7A5F2C" },
+  TELEPHONE_INTERNET:    { line:"9270 — Telephone & utilities",      ded:1.0,  color:"#0369a1" },
+  INSURANCE:             { line:"8690 — Insurance",                  ded:1.0,  color:"#4338ca" },
+  PROFESSIONAL_FEES:     { line:"8860 — Professional fees",          ded:1.0,  color:"#7e22ce" },
+  BANK_CHARGES:          { line:"8710 — Bank charges",               ded:1.0,  color:"#4b5563" },
+  SOFTWARE_SUBSCRIPTIONS:{ line:"8810 — Computer / SaaS",            ded:1.0,  color:"#0e7490" },
+  MEDICAL_SUPPLIES:      { line:"8811 — Profession-specific supplies",ded:1.0,  color:"#be185d" },
+  CONTINUING_EDUCATION:  { line:"8560 — Training",                   ded:1.0,  color:"#c2410c" },
+  PAYROLL:               { line:"9060 — Salaries & wages",           ded:1.0,  color:"#4d7c0f" },
+  UTILITIES:             { line:"9270 — Utilities",                  ded:1.0,  color:"#0f766e" },
+  UNCATEGORIZED:         { line:"— REVIEW REQUIRED —",               ded:0.0,  color:"#b91c1c" },
 };
 
 const RULES = [
